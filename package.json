@@ -1,0 +1,25 @@
+{
+  "name": "html-summarizer-agent",
+  "version": "1.0.0",
+  "description": "基于Mastra的AI Agent，用于HTML内容抽取和智能摘要",
+  "main": "index.js",
+  "scripts": {
+    "dev": "mastra dev",
+    "build": "mastra build",
+    "deploy": "wrangler deploy --config .mastra/output/wrangler.json",
+    "start": "mastra start"
+  },
+  "dependencies": {
+    "@mastra/core": "latest",
+    "@mastra/engine": "latest",
+    "@mozilla/readability": "^0.4.4",
+    "jsdom": "^22.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0",
+    "@cloudflare/workers-types": "^4.0.0"
+  },
+  "type": "module"
+}
