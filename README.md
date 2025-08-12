@@ -1,12 +1,12 @@
 # HTML Summarizer Agent
 
-基于Mastra框架构建的AI Agent，专门用于抓取网页内容、提取主要文本并生成智能摘要。
+基于Mastra框架构建的AI Agent，专门用于抓取网页内容、提取主要文本并生成智能摘要。支持部署到Cloudflare Workers。
 
 ## 功能特性
 
 - 🚀 **智能内容提取**: 自动抓取网页并提取主要文本内容
 - 🤖 **DeepSeek AI驱动**: 集成DeepSeek Chat模型生成高质量摘要
-- ⚡ **边缘计算**: 可部署在Cloudflare Workers，全球低延迟访问
+- ☁️ **Cloudflare Workers**: 支持一键部署到Cloudflare边缘网络
 - 🛠️ **工具链集成**: 内置网页抓取和内容分析工具
 - 📊 **结构化输出**: 返回摘要、要点、关键词和重要片段
 
@@ -14,28 +14,31 @@
 
 - **框架**: Mastra v0.13.1+ AI Agent Framework
 - **AI模型**: DeepSeek Chat API（通过@ai-sdk/openai兼容接口）
-- **API端点**: https://api.deepseek.com/v1
-- **部署平台**: Cloudflare Workers（可选）
+- **部署平台**: Cloudflare Workers
+- **部署工具**: @mastra/deployer-cloudflare
 - **内容提取**: 简单HTML解析器
 - **语言**: TypeScript
 
-## 项目结构
+## 项目结构（已优化）
 
 ```
 html-summarizer-agent/
 ├── src/
-│   └── mastra/                 # Mastra项目主目录
-│       ├── index.ts            # Mastra入口文件
-│       ├── agents/             # AI代理定义
+│   └── mastra/                 # 唯一的Mastra目录
+│       ├── index.ts            # 主入口文件
+│       ├── deployer.ts         # Cloudflare部署配置
+│       ├── agents/             # AI代理
 │       │   └── summarizer.ts   # 智能摘要代理（DeepSeek配置）
-│       └── tools/              # 工具定义
+│       └── tools/              # 工具
 │           └── fetchAndExtract.ts # 网页内容提取工具
-├── package.json
+├── package.json                # 包含Cloudflare部署依赖
 ├── tsconfig.json
 ├── .env.example
 ├── .gitignore
 └── README.md
 ```
+
+**清理说明**: 已删除所有冗余文件（`mastra.config.ts`、`src/index.ts`、重复的agents和tools目录），完全符合官方模板规范。
 
 ## 快速开始
 
@@ -43,6 +46,7 @@ html-summarizer-agent/
 - Node.js >= 20.9.0
 - npm 或 yarn
 - DeepSeek API密钥
+- Cloudflare账号（用于部署）
 
 ### 1. 克隆项目
 
@@ -59,24 +63,26 @@ npm install
 yarn install
 ```
 
-### 3. 配置DeepSeek API
+### 3. 配置环境变量
 
 ```bash
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，配置您的DeepSeek API密钥：
+编辑 `.env` 文件：
 ```env
 # DeepSeek AI配置
 DEEPSEEK_API_KEY=sk-your-deepseek-api-key-here
+
+# Cloudflare配置（用于部署）
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
 
 # 项目配置
 NODE_ENV=development
 ```
 
-**重要**: 确保您有有效的DeepSeek API密钥。访问 [DeepSeek官网](https://platform.deepseek.com) 获取API密钥。
-
-### 4. 启动开发服务器
+### 4. 本地开发
 
 ```bash
 npm run dev
@@ -85,6 +91,51 @@ yarn dev
 ```
 
 服务器将在 `http://localhost:3000` 启动
+
+## Cloudflare部署
+
+### 一键部署
+
+```bash
+# 构建并部署到Cloudflare Workers
+npm run deploy
+# 或者
+yarn deploy
+```
+
+### 部署配置
+
+项目已配置Cloudflare部署器（`src/mastra/deployer.ts`）：
+
+```typescript
+export const deployer = cloudflareDeployer({
+  accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+  apiToken: process.env.CLOUDFLARE_API_TOKEN,
+  name: 'html-summarizer-agent',
+  compatibility: {
+    date: '2024-08-01',
+    flags: []
+  },
+  env: {
+    DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY
+  }
+});
+```
+
+### 获取Cloudflare配置
+
+1. **Account ID**: 登录Cloudflare Dashboard，在右侧可以看到Account ID
+2. **API Token**: 在 `My Profile > API Tokens` 中创建自定义令牌，需要以下权限：
+   - Zone:Zone:Read
+   - Zone:Zone Settings:Edit
+   - Account:Cloudflare Workers:Edit
+
+### 部署后访问
+
+部署成功后，您的Agent将可以通过以下地址访问：
+```
+https://html-summarizer-agent.your-subdomain.workers.dev
+```
 
 ## DeepSeek集成说明
 
@@ -115,21 +166,15 @@ DeepSeek提供性价比极高的API服务：
 
 ## API 使用
 
-### 通过Mastra Web界面
-
-启动开发服务器后，访问 `http://localhost:3000` 使用Web界面测试Agent。
-
-### 通过API调用
+### 本地开发
 
 ```javascript
-// 使用Mastra Client
 import { MastraClient } from '@mastra/client-js';
 
 const client = new MastraClient({
-  baseUrl: 'http://localhost:3000' // 开发环境
+  baseUrl: 'http://localhost:3000'
 });
 
-// 调用摘要Agent
 const result = await client.agents.summarizerAgent.generate({
   messages: [
     {
@@ -138,13 +183,17 @@ const result = await client.agents.summarizerAgent.generate({
     }
   ]
 });
+```
 
-console.log(result);
+### 生产环境
+
+```javascript
+const client = new MastraClient({
+  baseUrl: 'https://html-summarizer-agent.your-subdomain.workers.dev'
+});
 ```
 
 ### 返回数据格式
-
-DeepSeek AI将返回结构化的JSON格式：
 
 ```json
 {
@@ -165,74 +214,68 @@ DeepSeek AI将返回结构化的JSON格式：
 
 ## 开发说明
 
-### DeepSeek配置优化
+### 项目结构优化
 
-1. **正确的OpenAI兼容设置**:
-   ```typescript
-   const deepseek = openai({
-     baseURL: 'https://api.deepseek.com/v1',
-     apiKey: process.env.DEEPSEEK_API_KEY,
-   });
-   ```
+✅ **已清理的冗余文件**:
+- 删除了根目录 `mastra.config.ts`（官方模板不需要）
+- 删除了 `src/index.ts`（与 `src/mastra/index.ts` 重复）
+- 删除了 `src/agents/` 和 `src/tools/`（与mastra目录下的重复）
 
-2. **模型调用**:
-   ```typescript
-   model: deepseek('deepseek-chat')
-   ```
+✅ **Cloudflare部署支持**:
+- 添加了 `@mastra/deployer-cloudflare` 依赖
+- 创建了 `src/mastra/deployer.ts` 配置文件
+- 更新了部署脚本
 
-3. **中文优化**: Agent指令专门针对中文回复进行了优化
+### 部署流程
 
-### 与官方模板的关键差异
-
-- ✅ **DeepSeek集成**: 通过@ai-sdk/openai兼容接口使用DeepSeek
-- ✅ **中文优化**: 针对中文内容分析和摘要优化
-- ✅ **成本效益**: 使用DeepSeek降低API调用成本
+1. `npm run build` - 构建项目
+2. `npm run deploy` - 部署到Cloudflare Workers
+3. 自动配置环境变量和域名
 
 ## 故障排除
+
+### Cloudflare部署问题
+
+1. **API Token权限不足**
+   ```bash
+   # 确保API Token有正确的权限
+   curl -X GET "https://api.cloudflare.com/client/v4/user/tokens/verify" \
+        -H "Authorization: Bearer YOUR_API_TOKEN"
+   ```
+
+2. **Account ID错误**
+   - 检查Cloudflare Dashboard右侧的Account ID
+
+3. **环境变量未设置**
+   ```bash
+   # 检查环境变量
+   cat .env | grep CLOUDFLARE
+   ```
 
 ### DeepSeek相关问题
 
 1. **API密钥错误**
    ```bash
-   # 检查API密钥是否正确
    cat .env | grep DEEPSEEK_API_KEY
    ```
 
-2. **网络连接问题**
+2. **网络连接测试**
    ```bash
-   # 测试DeepSeek API连接
    curl -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
         https://api.deepseek.com/v1/models
    ```
 
-3. **模型调用失败**
-   - 确保API密钥有效且有足够余额
-   - 检查网络是否能访问DeepSeek API
-
-### 常见问题
-
-1. **依赖问题**
-   ```bash
-   rm -rf node_modules package-lock.json
-   npm install
-   ```
-
-2. **环境变量问题**
-   ```bash
-   cat .env  # 检查环境变量
-   ```
-
 ## 更新日志
 
-### v1.5.0 (最新)
-- ✅ **优化DeepSeek配置**: 使用正确的OpenAI兼容接口设置
-- ✅ **API密钥管理**: 改进环境变量配置和文档
-- ✅ **中文优化**: 专门针对中文内容分析优化Agent指令
-- ✅ **成本说明**: 添加DeepSeek API费用说明
+### v1.6.0 (最新)
+- ✅ **Cloudflare部署支持**: 添加完整的Cloudflare Workers部署配置
+- ✅ **项目结构优化**: 删除所有冗余文件，符合官方模板规范
+- ✅ **一键部署**: 支持 `npm run deploy` 一键部署
+- ✅ **环境变量管理**: 优化生产环境配置
 
-### v1.4.0
-- ✅ 完全重构：严格按照官方my-mastra-app模板重写
-- ✅ 修复导入路径：使用正确的@mastra/core子模块
+### v1.5.0
+- ✅ 优化DeepSeek配置：使用正确的OpenAI兼容接口设置
+- ✅ API密钥管理：改进环境变量配置和文档
 
 ## 许可证
 
@@ -245,6 +288,6 @@ https://github.com/hinatayuan/html-summarizer-agent/issues
 
 ---
 
-🎉 **现在可以完美使用DeepSeek运行 `yarn dev`！** 
+🎉 **现在支持完整的Cloudflare Workers部署！** 
 
-专为DeepSeek API优化，提供高性价比的AI摘要服务。
+使用 `npm run deploy` 即可一键部署到全球边缘网络。
