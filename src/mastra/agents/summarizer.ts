@@ -4,6 +4,12 @@ import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { fetchAndExtractTool } from '../tools/fetchAndExtract';
 
+// 配置DeepSeek作为OpenAI兼容的提供者
+const deepseek = openai({
+  baseURL: 'https://api.deepseek.com/v1',
+  apiKey: process.env.DEEPSEEK_API_KEY || 'sk-1edd0944d3d24a76b3ded1aa0298e20f',
+});
+
 export const summarizerAgent = new Agent({
   name: 'HTML Summarizer Agent',
   instructions: `
@@ -16,28 +22,27 @@ export const summarizerAgent = new Agent({
 
       请按照以下JSON格式返回结果：
       {
-        \"title\": \"文章标题\",
-        \"summary\": \"200字以内的核心摘要\",
-        \"keyPoints\": [\"要点1\", \"要点2\", \"要点3\"],
-        \"keywords\": [\"关键词1\", \"关键词2\", \"关键词3\"],
-        \"highlights\": [
+        "title": "文章标题",
+        "summary": "200字以内的核心摘要",
+        "keyPoints": ["要点1", "要点2", "要点3"],
+        "keywords": ["关键词1", "关键词2", "关键词3"],
+        "highlights": [
           {
-            \"text\": \"重要片段文本\",
-            \"importance\": \"high|medium|low\",
-            \"category\": \"主要观点|数据|结论等\"
+            "text": "重要片段文本",
+            "importance": "high|medium|low",
+            "category": "主要观点|数据|结论等"
           }
         ],
-        \"readingTime\": \"预计阅读时间（分钟）\"
+        "readingTime": "预计阅读时间（分钟）"
       }
 
       请确保摘要简洁明了，要点突出重点，关键词准确反映内容主题。
+      
+      请务必使用中文回复，并确保JSON格式正确。
   `,
   
-  // 使用DeepSeek的OpenAI兼容API
-  model: openai('deepseek-chat', {
-    baseURL: 'https://api.deepseek.com/v1',
-    apiKey: process.env.DEEPSEEK_API_KEY || 'sk-1edd0944d3d24a76b3ded1aa0298e20f',
-  }),
+  // 使用配置好的DeepSeek模型
+  model: deepseek('deepseek-chat'),
   
   tools: { fetchAndExtractTool },
   
