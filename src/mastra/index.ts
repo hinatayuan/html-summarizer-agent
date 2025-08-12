@@ -3,6 +3,7 @@ import { Mastra } from '@mastra/core/mastra';
 import { PinoLogger } from '@mastra/loggers';
 import { LibSQLStore } from '@mastra/libsql';
 import { summarizerAgent } from './agents/summarizer';
+import { deployer } from './deployer';
 
 export const mastra = new Mastra({
   agents: { summarizerAgent },
@@ -14,4 +15,6 @@ export const mastra = new Mastra({
     name: 'HTMLSummarizer',
     level: 'info',
   }),
+  // 添加Cloudflare部署配置
+  deployer,
 });
