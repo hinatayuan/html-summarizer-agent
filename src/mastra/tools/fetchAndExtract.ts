@@ -38,14 +38,14 @@ const extractWebContent = async (url: string) => {
     
     const html = await response.text();
     
-    // 简单的HTML内容提取
-    let text = html.replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '');
-    text = text.replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '');
+    // 简单的HTML内容提取 - 修复正则表达式语法错误
+    let text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
     text = text.replace(/<[^>]*>/g, ' ');
-    text = text.replace(/\\s+/g, ' ').trim();
+    text = text.replace(/\s+/g, ' ').trim();
     
-    // 提取标题
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\\/title>/i);
+    // 提取标题 - 修复正则表达式语法错误
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
     const title = titleMatch ? titleMatch[1].trim() : '未知标题';
     
     console.log(`内容提取完成，标题: ${title}`);
