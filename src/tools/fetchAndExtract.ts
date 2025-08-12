@@ -1,6 +1,5 @@
-import { createTool } from '@mastra/core';
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
+import { Tool } from '@mastra/core';
+import { z } from 'zod';
 
 // 检查是否在Cloudflare Workers环境中
 function isCloudflareWorkers(): boolean {
@@ -46,34 +45,27 @@ async function extractWithHTMLRewriter(html: string): Promise<string> {
   return extractedText.trim();
 }
 
-// 回退方案：使用 Readability
-async function extractWithReadability(html: string, url: string): Promise<string> {
-  try {
-    const dom = new JSDOM(html, { url });
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
-    
-    return article?.textContent || '';
-  } catch (error) {
-    console.warn('Readability extraction failed:', error);
-    // 简单的HTML标签去除作为最终回退
-    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  }
+// 回退方案：简单的HTML标签去除
+function extractWithSimpleParser(html: string): string {
+  // 移除script和style标签及其内容
+  let text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+  
+  // 移除所有HTML标签
+  text = text.replace(/<[^>]*>/g, ' ');
+  
+  // 清理多余的空白字符
+  text = text.replace(/\s+/g, ' ').trim();
+  
+  return text;
 }
 
-export const fetchAndExtract = createTool({
+export const fetchAndExtractTool = new Tool({
   id: 'fetchAndExtract',
   description: '获取网页内容并提取主要文本内容',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      url: {
-        type: 'string',
-        description: '要抓取和提取内容的网页URL'
-      }
-    },
-    required: ['url']
-  },
+  inputSchema: z.object({
+    url: z.string().url().describe('要抓取和提取内容的网页URL')
+  }),
   
   async execute({ url }) {
     try {
@@ -95,13 +87,17 @@ export const fetchAndExtract = createTool({
       if (isCloudflareWorkers()) {
         extractedText = await extractWithHTMLRewriter(html);
       } else {
-        extractedText = await extractWithReadability(html, url);
+        extractedText = extractWithSimpleParser(html);
       }
+      
+      // 提取标题（通常是第一行非空内容）
+      const lines = extractedText.split('\n').filter(line => line.trim());
+      const title = lines[0] || 'Unknown Title';
       
       return {
         success: true,
         url,
-        title: extractedText.split('\n')[0] || 'Unknown Title',
+        title,
         content: extractedText,
         wordCount: extractedText.split(' ').length,
         extractedAt: new Date().toISOString()
