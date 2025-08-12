@@ -1,7 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { Agent } from '@mastra/core/agent'
 import { Memory } from '@mastra/memory'
-import { LibSQLStore } from '@mastra/libsql'
 import { fetchAndExtractTool } from '../tools/fetchAndExtract'
 
 // 安全的 DeepSeek 模型配置 - 从环境变量获取
@@ -44,11 +43,8 @@ export const summarizerAgent = new Agent({
   // 使用配置好的DeepSeek模型
   model: deepseek('deepseek-chat'),
 
-  tools: { fetchAndExtractTool },
+  tools: { fetchAndExtractTool }
 
-  memory: new Memory({
-    storage: new LibSQLStore({
-      url: ':memory:' // 使用内存存储
-    })
-  })
+  // 在 Cloudflare Workers 环境中，使用默认内存存储
+  // memory: new Memory() // 暂时注释掉，使用默认配置
 })

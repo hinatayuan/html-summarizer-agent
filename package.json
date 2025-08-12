@@ -12,8 +12,7 @@
     "dev": "mastra dev",
     "build": "mastra build",
     "start": "mastra start",
-    "deploy": "mastra build && wrangler deploy",
-    "deploy:cloudflare": "wrangler deploy"
+    "deploy": "wrangler deploy --config .mastra/output/wrangler.json"
   },
   "keywords": ["ai", "agent", "html", "summarizer", "mastra", "deepseek", "cloudflare"],
   "author": "",
@@ -24,6 +23,7 @@
     "@mastra/libsql": "^0.13.1",
     "@mastra/loggers": "^0.10.6",
     "@mastra/memory": "^0.12.1",
+    "@mastra/deployer-cloudflare": "latest",
     "zod": "^3.25.76"
   },
   "devDependencies": {
