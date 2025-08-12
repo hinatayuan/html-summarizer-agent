@@ -12,9 +12,9 @@
     "dev": "mastra dev",
     "build": "mastra build",
     "start": "mastra start",
-    "deploy": "wrangler deploy --config .mastra/output/wrangler.json"
+    "deploy": "mastra build && mastra deploy"
   },
-  "keywords": ["ai", "agent", "html", "summarizer", "mastra", "deepseek"],
+  "keywords": ["ai", "agent", "html", "summarizer", "mastra", "deepseek", "cloudflare"],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -23,15 +23,12 @@
     "@mastra/libsql": "^0.13.1",
     "@mastra/loggers": "^0.10.6",
     "@mastra/memory": "^0.12.1",
-    "zod": "^3.25.76",
-    "@mozilla/readability": "^0.4.4",
-    "jsdom": "^22.1.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",
-    "@cloudflare/workers-types": "^4.0.0",
+    "@mastra/deployer-cloudflare": "^0.13.1",
     "mastra": "^0.10.20",
-    "typescript": "^5.9.2",
-    "wrangler": "^3.0.0"
+    "typescript": "^5.9.2"
   }
 }
