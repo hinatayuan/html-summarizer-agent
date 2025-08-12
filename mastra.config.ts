@@ -1,4 +1,6 @@
 import { Mastra } from '@mastra/core';
+import { fetchAndExtractTool } from './src/tools/fetchAndExtract.js';
+import { summarizerAgent } from './src/agents/summarizer.js';
 
 export default new Mastra({
   name: 'html-summarizer-agent',
@@ -16,11 +18,11 @@ export default new Mastra({
     }
   ],
 
-  // 配置工具
-  tools: [],
+  // 注册工具
+  tools: [fetchAndExtractTool],
 
-  // 配置代理
-  agents: [],
+  // 注册代理
+  agents: [summarizerAgent],
 
   // 配置内存存储
   memory: {
