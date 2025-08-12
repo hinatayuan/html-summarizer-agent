@@ -3,23 +3,35 @@
   "version": "1.0.0",
   "description": "基于Mastra的AI Agent，用于HTML内容抽取和智能摘要",
   "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "mastra dev",
     "build": "mastra build",
-    "deploy": "wrangler deploy --config .mastra/output/wrangler.json",
-    "start": "mastra start"
+    "start": "mastra start",
+    "deploy": "wrangler deploy --config .mastra/output/wrangler.json"
   },
+  "keywords": ["ai", "agent", "html", "summarizer", "mastra", "deepseek"],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "@mastra/core": "latest",
-    "@mastra/engine": "latest",
+    "@ai-sdk/openai": "^1.0.0",
+    "@mastra/core": "^0.13.1",
+    "@mastra/libsql": "^0.13.1",
+    "@mastra/loggers": "^0.10.6",
+    "@mastra/memory": "^0.12.1",
+    "zod": "^3.25.76",
     "@mozilla/readability": "^0.4.4",
     "jsdom": "^22.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "wrangler": "^3.0.0",
-    "@cloudflare/workers-types": "^4.0.0"
-  },
-  "type": "module"
+    "@types/node": "^24.2.1",
+    "@cloudflare/workers-types": "^4.0.0",
+    "mastra": "^0.10.20",
+    "typescript": "^5.9.2",
+    "wrangler": "^3.0.0"
+  }
 }
