@@ -1,32 +1,38 @@
 import { Mastra } from '@mastra/core';
-import { CloudflareDeployer } from '@mastra/cloudflare';
 
-export default {
+export default new Mastra({
   name: 'html-summarizer-agent',
-  agents: [
+  
+  // 配置DeepSeek LLM
+  llms: [
     {
-      name: 'summarizer',
-      instructions: '你是一个专业的内容摘要助手。请分析提供的网页内容，生成简洁的摘要和关键信息片段。',
-      model: {
-        provider: 'DEEPSEEK',
-        name: 'deepseek-chat'
-      },
-      tools: ['fetchAndExtract']
-    }
-  ],
-  tools: [
-    {
-      name: 'fetchAndExtract'
-    }
-  ],
-  deploy: {
-    cloudflare: {
-      accountId: '4f626c727482ce1b73d26bb9f9244d79',
-      projectName: 'html-summarizer-agent',
-      routes: ['https://html-summarizer-agent.workers.dev/*'],
-      auth: {
-        apiToken: 'nludYXBjgyYP4lQvfMiqb061Hk6juU9rwmWjs56q'
+      name: 'deepseek',
+      provider: 'openai',
+      config: {
+        baseURL: 'https://api.deepseek.com/v1',
+        apiKey: process.env.DEEPSEEK_API_KEY || 'sk-1edd0944d3d24a76b3ded1aa0298e20f',
+        model: 'deepseek-chat'
       }
     }
+  ],
+
+  // 配置工具
+  tools: [],
+
+  // 配置代理
+  agents: [],
+
+  // 配置内存存储
+  memory: {
+    provider: 'libsql',
+    config: {
+      url: ':memory:'
+    }
+  },
+
+  // 配置日志
+  logger: {
+    provider: 'console',
+    level: 'info'
   }
-} satisfies Mastra;
+});
