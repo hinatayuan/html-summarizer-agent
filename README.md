@@ -6,39 +6,9 @@
 
 - 🚀 **智能内容提取**: 自动抓取网页并提取主要文本内容
 - 🤖 **DeepSeek AI驱动**: 集成DeepSeek Chat模型生成高质量摘要
-- ☁️ **Cloudflare Workers**: 支持一键部署到Cloudflare边缘网络
+- ☁️ **Cloudflare Workers**: 支持部署到Cloudflare边缘网络
 - 🛠️ **工具链集成**: 内置网页抓取和内容分析工具
 - 📊 **结构化输出**: 返回摘要、要点、关键词和重要片段
-
-## 技术架构
-
-- **框架**: Mastra v0.13.1+ AI Agent Framework
-- **AI模型**: DeepSeek Chat API（通过@ai-sdk/openai兼容接口）
-- **部署平台**: Cloudflare Workers
-- **部署工具**: @mastra/deployer-cloudflare
-- **内容提取**: 简单HTML解析器
-- **语言**: TypeScript
-
-## 项目结构（已优化）
-
-```
-html-summarizer-agent/
-├── src/
-│   └── mastra/                 # 唯一的Mastra目录
-│       ├── index.ts            # 主入口文件
-│       ├── deployer.ts         # Cloudflare部署配置
-│       ├── agents/             # AI代理
-│       │   └── summarizer.ts   # 智能摘要代理（DeepSeek配置）
-│       └── tools/              # 工具
-│           └── fetchAndExtract.ts # 网页内容提取工具
-├── package.json                # 包含Cloudflare部署依赖
-├── tsconfig.json
-├── .env.example
-├── .gitignore
-└── README.md
-```
-
-**清理说明**: 已删除所有冗余文件（`mastra.config.ts`、`src/index.ts`、重复的agents和tools目录），完全符合官方模板规范。
 
 ## 快速开始
 
@@ -48,22 +18,15 @@ html-summarizer-agent/
 - DeepSeek API密钥
 - Cloudflare账号（用于部署）
 
-### 1. 克隆项目
+### 1. 克隆并安装
 
 ```bash
 git clone https://github.com/hinatayuan/html-summarizer-agent.git
 cd html-summarizer-agent
-```
-
-### 2. 安装依赖
-
-```bash
 npm install
-# 或者
-yarn install
 ```
 
-### 3. 配置环境变量
+### 2. 配置环境变量
 
 ```bash
 cp .env.example .env
@@ -71,98 +34,107 @@ cp .env.example .env
 
 编辑 `.env` 文件：
 ```env
-# DeepSeek AI配置
 DEEPSEEK_API_KEY=sk-your-deepseek-api-key-here
-
-# Cloudflare配置（用于部署）
 CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
 CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
-
-# 项目配置
-NODE_ENV=development
 ```
 
-### 4. 本地开发
+### 3. 本地开发
 
 ```bash
 npm run dev
-# 或者
-yarn dev
 ```
 
-服务器将在 `http://localhost:3000` 启动
+## 部署到Cloudflare Workers
 
-## Cloudflare部署
-
-### 一键部署
+### 方法一：使用Mastra构建 + Wrangler部署
 
 ```bash
-# 构建并部署到Cloudflare Workers
+# 1. 构建项目
+npm run build
+
+# 2. 部署到Cloudflare
 npm run deploy
-# 或者
-yarn deploy
+```
+
+### 方法二：直接使用Wrangler部署
+
+```bash
+# 安装Wrangler CLI（如果还没有）
+npm install -g wrangler
+
+# 登录Cloudflare
+wrangler auth login
+
+# 部署
+npm run deploy:cloudflare
 ```
 
 ### 部署配置
 
-项目已配置Cloudflare部署器（`src/mastra/deployer.ts`）：
+项目包含 `wrangler.toml` 配置文件：
 
-```typescript
-export const deployer = cloudflareDeployer({
-  accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
-  apiToken: process.env.CLOUDFLARE_API_TOKEN,
-  name: 'html-summarizer-agent',
-  compatibility: {
-    date: '2024-08-01',
-    flags: []
-  },
-  env: {
-    DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY
-  }
-});
+```toml
+name = "html-summarizer-agent"
+main = ".mastra/output/index.js"
+compatibility_date = "2024-08-01"
+
+[vars]
+DEEPSEEK_API_KEY = "your-deepseek-api-key"
 ```
 
-### 获取Cloudflare配置
+### 获取Cloudflare配置信息
 
-1. **Account ID**: 登录Cloudflare Dashboard，在右侧可以看到Account ID
-2. **API Token**: 在 `My Profile > API Tokens` 中创建自定义令牌，需要以下权限：
+1. **Account ID**: 在Cloudflare Dashboard右侧可见
+2. **API Token**: 在 `My Profile > API Tokens` 创建，需要权限：
    - Zone:Zone:Read
-   - Zone:Zone Settings:Edit
+   - Zone:Zone Settings:Edit  
    - Account:Cloudflare Workers:Edit
 
-### 部署后访问
+## 故障排除
 
-部署成功后，您的Agent将可以通过以下地址访问：
-```
-https://html-summarizer-agent.your-subdomain.workers.dev
-```
+### 构建失败
 
-## DeepSeek集成说明
+1. **检查Node.js版本**
+   ```bash
+   node --version  # 需要 >= 20.9.0
+   ```
 
-### API配置
+2. **清理依赖重新安装**
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
 
-项目使用DeepSeek的OpenAI兼容接口：
+3. **检查TypeScript编译**
+   ```bash
+   npx tsc --noEmit
+   ```
 
-```typescript
-const deepseek = openai({
-  baseURL: 'https://api.deepseek.com/v1',
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
+### Cloudflare部署问题
 
-// 使用DeepSeek Chat模型
-model: deepseek('deepseek-chat')
-```
+1. **检查wrangler配置**
+   ```bash
+   wrangler whoami
+   ```
 
-### 支持的模型
+2. **验证构建输出**
+   ```bash
+   ls -la .mastra/output/
+   ```
 
-- **deepseek-chat**: 对话模型，适合摘要和分析任务
-- **deepseek-coder**: 代码模型（可选）
+3. **手动部署测试**
+   ```bash
+   wrangler deploy --dry-run
+   ```
 
-### API费用
+### DeepSeek API问题
 
-DeepSeek提供性价比极高的API服务：
-- 输入：¥0.14/百万tokens
-- 输出：¥0.28/百万tokens
+1. **测试API连接**
+   ```bash
+   curl -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+        https://api.deepseek.com/v1/models
+   ```
 
 ## API 使用
 
@@ -177,10 +149,7 @@ const client = new MastraClient({
 
 const result = await client.agents.summarizerAgent.generate({
   messages: [
-    {
-      role: 'user',
-      content: '请分析这个网页：https://example.com/article'
-    }
+    { role: 'user', content: '请分析这个网页：https://example.com/article' }
   ]
 });
 ```
@@ -212,70 +181,42 @@ const client = new MastraClient({
 }
 ```
 
-## 开发说明
+## 项目结构
 
-### 项目结构优化
+```
+html-summarizer-agent/
+├── src/
+│   └── mastra/                 # Mastra项目目录
+│       ├── index.ts            # 主入口文件
+│       ├── agents/             # AI代理
+│       │   └── summarizer.ts   # DeepSeek摘要代理
+│       └── tools/              # 工具
+│           └── fetchAndExtract.ts # 内容提取工具
+├── wrangler.toml               # Cloudflare部署配置
+├── package.json
+├── .env.example
+└── README.md
+```
 
-✅ **已清理的冗余文件**:
-- 删除了根目录 `mastra.config.ts`（官方模板不需要）
-- 删除了 `src/index.ts`（与 `src/mastra/index.ts` 重复）
-- 删除了 `src/agents/` 和 `src/tools/`（与mastra目录下的重复）
+## 技术架构
 
-✅ **Cloudflare部署支持**:
-- 添加了 `@mastra/deployer-cloudflare` 依赖
-- 创建了 `src/mastra/deployer.ts` 配置文件
-- 更新了部署脚本
-
-### 部署流程
-
-1. `npm run build` - 构建项目
-2. `npm run deploy` - 部署到Cloudflare Workers
-3. 自动配置环境变量和域名
-
-## 故障排除
-
-### Cloudflare部署问题
-
-1. **API Token权限不足**
-   ```bash
-   # 确保API Token有正确的权限
-   curl -X GET "https://api.cloudflare.com/client/v4/user/tokens/verify" \
-        -H "Authorization: Bearer YOUR_API_TOKEN"
-   ```
-
-2. **Account ID错误**
-   - 检查Cloudflare Dashboard右侧的Account ID
-
-3. **环境变量未设置**
-   ```bash
-   # 检查环境变量
-   cat .env | grep CLOUDFLARE
-   ```
-
-### DeepSeek相关问题
-
-1. **API密钥错误**
-   ```bash
-   cat .env | grep DEEPSEEK_API_KEY
-   ```
-
-2. **网络连接测试**
-   ```bash
-   curl -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
-        https://api.deepseek.com/v1/models
-   ```
+- **框架**: Mastra v0.13.1+ AI Agent Framework
+- **AI模型**: DeepSeek Chat API
+- **部署**: Cloudflare Workers + Wrangler CLI
+- **内容提取**: HTML解析器
+- **语言**: TypeScript
 
 ## 更新日志
 
-### v1.6.0 (最新)
-- ✅ **Cloudflare部署支持**: 添加完整的Cloudflare Workers部署配置
-- ✅ **项目结构优化**: 删除所有冗余文件，符合官方模板规范
-- ✅ **一键部署**: 支持 `npm run deploy` 一键部署
-- ✅ **环境变量管理**: 优化生产环境配置
+### v1.7.0 (最新)
+- ✅ **修复构建问题**: 移除有问题的部署器依赖
+- ✅ **Wrangler集成**: 使用传统稳定的Wrangler部署方式
+- ✅ **部署配置**: 添加完整的wrangler.toml配置
+- ✅ **故障排除**: 完善的错误诊断指南
 
-### v1.5.0
-- ✅ 优化DeepSeek配置：使用正确的OpenAI兼容接口设置
-- ✅ API密钥管理：改进环境变量配置和文档
+### v1.6.0
+- ✅ Cloudflare部署支持：添加完整的Cloudflare Workers部署配置
+- ✅ 项目结构优化：删除所有冗余文件
 
 ## 许可证
 
@@ -288,6 +229,6 @@ https://github.com/hinatayuan/html-summarizer-agent/issues
 
 ---
 
-🎉 **现在支持完整的Cloudflare Workers部署！** 
+🎉 **现在可以稳定构建和部署了！** 
 
-使用 `npm run deploy` 即可一键部署到全球边缘网络。
+先运行 `npm run build` 测试构建，然后使用 `npm run deploy` 部署到Cloudflare。
