@@ -24,11 +24,26 @@ export const mastra = new Mastra({
       NODE_ENV: 'production'
     },
     kvNamespaces: [
-      // 可选：添加 KV 存储命名空间
-      // {
-      //   binding: 'NEWS_CACHE',
-      //   id: process.env.CLOUDFLARE_KV_NAMESPACE_ID || '',
-      // },
+      // 缓存存储命名空间
+      {
+        binding: 'CACHE_KV',
+        id: process.env.CLOUDFLARE_CACHE_KV_ID || '',
+      },
+      // 监控数据存储命名空间  
+      {
+        binding: 'MONITORING_KV',
+        id: process.env.CLOUDFLARE_MONITORING_KV_ID || '',
+      },
+      // 错误追踪存储命名空间
+      {
+        binding: 'ERROR_KV', 
+        id: process.env.CLOUDFLARE_ERROR_KV_ID || '',
+      },
+      // 向量索引存储命名空间（如果使用KV模拟）
+      {
+        binding: 'VECTOR_KV',
+        id: process.env.CLOUDFLARE_VECTOR_KV_ID || '',
+      }
     ],
     routes: [
       // 可选：自定义域名路由

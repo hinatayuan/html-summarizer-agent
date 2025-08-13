@@ -1,7 +1,7 @@
 {
   "name": "html-summarizer-agent",
   "version": "1.0.0",
-  "description": "基于Mastra的AI Agent，用于HTML内容抽取和智能摘要",
+  "description": "功能强大的AI Agent，支持HTML/PDF内容抽取、RSS订阅、多语言翻译、RAG检索、相似度检测等功能",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -12,9 +12,12 @@
     "dev": "mastra dev",
     "build": "mastra build",
     "start": "mastra start",
-    "deploy": "wrangler deploy --config .mastra/output/wrangler.json"
+    "deploy": "wrangler deploy --config .mastra/output/wrangler.json",
+    "health": "node scripts/health-check.js",
+    "monitor": "node scripts/monitor-stats.js",
+    "cache:clear": "node scripts/clear-cache.js"
   },
-  "keywords": ["ai", "agent", "html", "summarizer", "mastra", "deepseek", "cloudflare"],
+  "keywords": ["ai", "agent", "html", "pdf", "rss", "summarizer", "translator", "rag", "similarity", "mastra", "deepseek", "cloudflare"],
   "author": "",
   "license": "MIT",
   "dependencies": {

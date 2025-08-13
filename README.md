@@ -1,14 +1,46 @@
-# HTML Summarizer Agent
+# Enhanced HTML Summarizer Agent
 
-基于Mastra框架构建的AI Agent，专门用于抓取网页内容、提取主要文本并生成智能摘要。支持部署到Cloudflare Workers。
+🤖 **功能强大的多模态AI Agent** - 基于Mastra框架构建，支持网页、PDF、RSS等多种内容源的智能分析和摘要生成。
 
-## 功能特性
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hinatayuan/html-summarizer-agent)
 
-- 🚀 **智能内容提取**: 自动抓取网页并提取主要文本内容
-- 🤖 **DeepSeek AI驱动**: 集成DeepSeek Chat模型生成高质量摘要
-- ☁️ **Cloudflare Workers**: 支持部署到Cloudflare边缘网络
-- 🛠️ **工具链集成**: 内置网页抓取和内容分析工具
-- 📊 **结构化输出**: 返回摘要、要点、关键词和重要片段
+## ✨ 核心功能
+
+### 📄 多格式内容支持
+- 🌐 **HTML网页解析**: 智能提取网页标题、正文和高亮内容
+- 📄 **PDF文档处理**: 支持PDF文档的文本提取和元数据获取
+- 📡 **RSS订阅管理**: 解析RSS/Atom源，批量处理订阅内容
+- 🔍 **智能内容识别**: 自动识别文章结构、重要段落和关键信息
+
+### 🌍 多语言处理
+- 🔤 **自动语言检测**: 智能识别内容语言
+- 🌐 **多语言翻译**: 支持20+主流语言的AI翻译
+- 📝 **批量翻译**: 高效处理大量文本的翻译需求
+- 🎯 **本地化摘要**: 生成符合目标语言习惯的摘要
+
+### 🧠 RAG增强检索
+- 🗄️ **向量存储**: 使用Cloudflare Vectorize存储文档向量
+- 🔍 **语义搜索**: 基于向量相似度的智能内容检索
+- 💡 **知识增强**: 结合历史相关内容生成更准确摘要
+- 🔗 **内容关联**: 自动发现和链接相关主题
+
+### 🎯 相似度检测
+- 📊 **多算法支持**: 余弦、Jaccard、编辑距离、语义相似度
+- 🔄 **重复内容检测**: 智能识别和去除重复内容
+- 🔖 **内容指纹**: 快速生成文档指纹用于去重
+- 📈 **相似度分析**: 详细的相似度计算报告
+
+### ⚡ 智能缓存
+- 🚀 **边缘缓存**: 基于Cloudflare KV的高速缓存系统
+- ⏰ **TTL控制**: 灵活的缓存过期时间设置
+- 🧹 **缓存管理**: 支持缓存清理和预热功能
+- 📊 **缓存统计**: 命中率和性能监控
+
+### 📈 监控运维
+- 🔍 **性能监控**: 实时跟踪响应时间和资源使用
+- 🚨 **错误追踪**: 智能错误分类和解决建议
+- 📊 **使用统计**: 详细的功能使用分析
+- ❤️ **健康检查**: 全面的系统状态监控
 
 ## 快速开始
 
@@ -34,9 +66,23 @@ cp .env.example .env
 
 编辑 `.env` 文件：
 ```env
+# AI服务配置
 DEEPSEEK_API_KEY=sk-your-deepseek-api-key-here
+
+# Cloudflare基础配置
 CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
 CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
+CLOUDFLARE_PROJECT_NAME=html-summarizer-agent
+
+# KV存储命名空间ID（可选，用于缓存和监控）
+CLOUDFLARE_CACHE_KV_ID=your-cache-kv-namespace-id
+CLOUDFLARE_MONITORING_KV_ID=your-monitoring-kv-namespace-id
+CLOUDFLARE_ERROR_KV_ID=your-error-kv-namespace-id
+CLOUDFLARE_VECTOR_KV_ID=your-vector-kv-namespace-id
+
+# 可选配置
+NODE_ENV=development
+LOG_LEVEL=info
 ```
 
 ### 3. 本地开发
